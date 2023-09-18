@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+	
+	<!-- Connection Pool & DataSource 3가지 방식 -->
+	<!-- 
+	<bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource">
+		<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver" />
+		<property name="url" value="jdbc:oracle:thin:@Localhost:1521:xe" />
+		<property name="username" value="c##java" />
+		<property name="password" value="1231" />
+	</bean> -->
+	
+	<!-- p라는 namespace를 사용해 설정 -->
+	<!-- 
+	<bean id="dataSource" 
+		  class="org.apache.commons.dbcp2.BasicDataSource" 
+		  p:driverClassName="oracle.jdbc.driver.OracleDriver"
+		  p:url="jdbc:oracle:thin:@localhost:1521:xe"
+		  p:username="c##java"
+		  p:password="1231" /> -->
+		  
+	<!-- properties를 사용해 설정 -->
+	<context:property-placeholder location="classpath:spring/db.properties" /> <!-- db.properties의 위치를 알려줌 -->	
+	<bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource">
+		<property name="driverClassName" value="${jdbc.driver}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+	</bean> 
+
+	
+	<bean id="helloSpring" class="user.main.HelloSpring" />
+	
+	<bean id="userInsertService" class="user.service.UserInsertService">
+		<property name="userDTO" ref="userDTO" />
+		<property name="userDAO" ref="userDAOImpl" /> <!-- 주의!! UserDAO는 인터페이스 -->
+	</bean>
+	
+	<bean id="userSelectService" class="user.service.UserSelectService"></bean>
+	
+	<bean id="userDTO" class="user.bean.UserDTO"></bean>
+	
+	<bean id="userDAOImpl" class="user.dao.UserDAOImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate"></property>
+	<!-- UserDAOImpl.java Setter의 jdbcTemplate, JdbcTemplate bean의 jdbcTemplate -->
+	</bean>
+	
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<!-- JdbcTemplate를 만든 곳에서 만든 규약 : 생성자를 통해서 connection pool값을 제공한다. -->
+		<constructor-arg ref="dataSource"></constructor-arg> 
+	</bean>
+
+</beans>
